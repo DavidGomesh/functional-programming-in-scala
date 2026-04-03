@@ -1,9 +1,19 @@
-name := "fpinscala"
+val scala3Version = "3.3.7"
 
-ThisBuild / scalaVersion := "3.3.0"
+lazy val root = project
+  .in(file("."))
+  .settings(
+    name := "functional-programming-in-scala",
+    version := "0.1.0-SNAPSHOT",
 
-ThisBuild / githubWorkflowBuild := Seq(WorkflowStep.Sbt(name = Some("Build project"), commands = List("test:compile")))
+    scalaVersion := scala3Version,
 
-ThisBuild / scalacOptions ++= List("-feature", "-deprecation", "-Ykind-projector:underscores", "-source:future")
+    scalacOptions ++= List(
+      "-feature",
+      "-deprecation",
+      "-Ykind-projector:underscores",
+      "-source:future"
+    ),
 
-ThisBuild / libraryDependencies += "org.scalameta" %% "munit" % "0.7.29" % Test
+    libraryDependencies += "org.scalameta" %% "munit" % "0.7.29" % Test
+  )
