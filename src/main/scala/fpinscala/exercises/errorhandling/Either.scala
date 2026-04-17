@@ -8,26 +8,41 @@ enum Either[+E,+A]:
   case Left(get: E)
   case Right(get: A)
 
-  def map[B](f: A => B): Either[E, B] = ???
+  def map[B](f: A => B): Either[E, B] =
+    this match
+      case Left(e) => Left(e)
+      case Right(v) => Right(f(v))
 
-  def flatMap[EE >: E, B](f: A => Either[EE, B]): Either[EE, B] = ???
+  def flatMap[EE >: E, B](f: A => Either[EE, B]): Either[EE, B] =
+    this match
+      case Left(e) => Left(e)
+      case Right(v) => f(v)
 
-  def orElse[EE >: E, B >: A](b: => Either[EE, B]): Either[EE, B] = ???
+  def orElse[EE >: E, B >: A](b: => Either[EE, B]): Either[EE, B] =
+    this match
+      case Left(e) => b
+      case _ => this
 
-  def map2[EE >: E, B, C](b: Either[EE, B])(f: (A, B) => C): Either[EE, C] = ???
+  def map2[EE >: E, B, C](b: Either[EE, B])(f: (A, B) => C): Either[EE, C] = 
+    for 
+      a <- this
+      b <- b
+    yield f(a, b)
 
 object Either:
-  def traverse[E,A,B](es: List[A])(f: A => Either[E, B]): Either[E, List[B]] = ???
+  def traverse[E,A,B](es: List[A])(f: A => Either[E, B]): Either[E, List[B]] = 
+    es.foldRight(Right[E, List[B]](List.empty))((a, eebs) => f(a).map2(eebs)((b, bs) => b :: bs))
 
-  def sequence[E,A](es: List[Either[E,A]]): Either[E,List[A]] = ???
+  def sequence[E,A](es: List[Either[E,A]]): Either[E,List[A]] = 
+    traverse(es)(e => e)
 
-  def mean(xs: IndexedSeq[Double]): Either[String, Double] = 
+  def mean(xs: IndexedSeq[Double]): Either[String, Double] =
     if xs.isEmpty then
       Left("mean of empty list!")
-    else 
+    else
       Right(xs.sum / xs.length)
 
-  def safeDiv(x: Int, y: Int): Either[Throwable, Int] = 
+  def safeDiv(x: Int, y: Int): Either[Throwable, Int] =
     try Right(x / y)
     catch case NonFatal(t) => Left(t)
 
